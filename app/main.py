@@ -5,6 +5,7 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.database.init_db import create_tables
 from app.database.database import get_db
+from app.routers.users import router as users_router
 
 # app = FastAPI(
 #     title='FastKar Ecommerce API',
@@ -20,6 +21,9 @@ app = FastAPI(
 @app.on_event('startup')
 def startup():
     create_tables()
+
+
+app.include_router(users_router)
 
 @app.get('/')
 def root():
