@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug:bool = True
     app_description: str = 'E-commerce backend built with FastAPI and Postgresql'
+    database_url:str
 
     model_config = SettingsConfigDict(
         env_files = '.env',
