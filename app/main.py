@@ -1,5 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+
 from app.core.config import settings
+from app.database.init_db import create_tables
+from app.database.database import get_db
 
 # app = FastAPI(
 #     title='FastKar Ecommerce API',
@@ -12,6 +17,10 @@ app = FastAPI(
     version= settings.app_version
 )
 
+@app.on_event('startup')
+def startup():
+    create_tables()
+
 @app.get('/')
 def root():
     return {
@@ -22,4 +31,12 @@ def root():
 def health_check():
     return {
         'status':"Healty"
+    }
+
+@app.get('/health/db')
+def database_health_check(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+
+    return {
+        'database':'Connected'
     }
