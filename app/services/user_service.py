@@ -2,13 +2,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.core.security import hash_password
 
 
 def create_user(db: Session, user_data: UserCreate) -> User:
     user = User(
         name = user_data.name,
         email = user_data.email,
-        password = user_data.password
+        password = hash_password(user_data.password)
     )
 
     db.add(user)
