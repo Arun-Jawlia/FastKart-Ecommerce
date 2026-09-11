@@ -3,10 +3,10 @@ import jwt
 from pwdlib import PasswordHash
 from app.core.config import settings
 
-pasword_hash = PasswordHash.recommended()
+password_hash = PasswordHash.recommended()
 
 def hash_password(password: str)->str:
-    return pasword_hash.hash(password)
+    return password_hash.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> str:

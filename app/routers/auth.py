@@ -5,7 +5,8 @@ from app.core.security import (
 )
 from app.database.database import get_db
 from app.schemas.auth import LoginRequest, TokenRequest
-from app.services import user_services
+from app.services import user_service
+from app.schemas.user import UserCreate, UserResponse
 
 router = APIRouter(
     prefix='/auth',
@@ -14,7 +15,7 @@ router = APIRouter(
 
 @router.post('/login', response_model=TokenRequest)
 def login(login_data: LoginRequest, db: Session = Depends(get_db)):
-    user = user_services.get_user_by_email(db, login_data.email)
+    user = user_service.get_user_by_email(db, login_data.email)
 
     if not user:
         raise HTTPException(
@@ -38,3 +39,15 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": 'bearer'
     }
 
+
+@router.post('/register', response_model = UserResponse, status_code=status.HTTP_201_CREATED,)
+def regsiter(user_data: UserCreate, db: Session= Depends(get_db)):
+    existing_user = user_service.get_user_by_email(db, user_data.email)
+
+    if existing_user:
+        raise HTTPException(
+            status_code = status.HTTP_409_CONFLICT,
+            detail='Email already registered'
+        )
+
+    return user_service.create_user(db, user_data)

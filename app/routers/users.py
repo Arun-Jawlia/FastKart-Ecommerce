@@ -9,10 +9,14 @@ from app.schemas.user import (
 )
 from app.services import user_service
 
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
 router = APIRouter(
     prefix='/users',
     tags=['Users']
 )
+
 
 @router.post('', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user_data: UserCreate, db: Session= Depends(get_db)):
@@ -31,6 +35,10 @@ def create_user(user_data: UserCreate, db: Session= Depends(get_db)):
 @router.get('', response_model=list[UserResponse])
 def get_users(db: Session = Depends(get_db)):
     return user_service.get_all_users(db)
+
+@router.get('/me', response_model=UserResponse)
+def get_current_user_profile(current_user: User = Depends(get_current_user)):
+    return current_user
 
 @router.get('/{user_id}', response_model=UserResponse)
 def get_user_by_id(user_id: int, db:Session= Depends(get_db)):
