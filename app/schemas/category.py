@@ -13,6 +13,6 @@ class CategoryResponse(BaseModel):
     name: str
     description: str | None
 
-    mode_config = ConfigDict(
+    model_config = ConfigDict(
         from_attributes=True
     )

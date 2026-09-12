@@ -8,6 +8,7 @@ from app.database.database import get_db
 from app.routers.users import router as users_router
 from app.routers.auth import router as auth_router
 from app.routers.category import router as category_router
+from app.routers.products import router as products_router
 
 # app = FastAPI(
 #     title='FastKar Ecommerce API',
@@ -28,6 +29,7 @@ def startup():
 app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(category_router)
+app.include_router(products_router)
 
 @app.get('/')
 def root():
