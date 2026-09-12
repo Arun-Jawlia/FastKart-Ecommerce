@@ -7,6 +7,7 @@ from app.database.init_db import create_tables
 from app.database.database import get_db
 from app.routers.users import router as users_router
 from app.routers.auth import router as auth_router
+from app.routers.category import router as category_router
 
 # app = FastAPI(
 #     title='FastKar Ecommerce API',
@@ -26,6 +27,7 @@ def startup():
 
 app.include_router(users_router)
 app.include_router(auth_router)
+app.include_router(category_router)
 
 @app.get('/')
 def root():
