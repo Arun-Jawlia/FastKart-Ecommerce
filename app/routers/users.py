@@ -9,7 +9,7 @@ from app.schemas.user import (
 )
 from app.services import user_service
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_admin
 from app.models.user import User
 
 router = APIRouter(
@@ -18,22 +18,22 @@ router = APIRouter(
 )
 
 
-@router.post('', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user_data: UserCreate, db: Session= Depends(get_db)):
-    existing_user = user_service.get_user_by_email(db, user_data.email)
+# @router.post('', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+# def create_user(user_data: UserCreate, db: Session= Depends(get_db)):
+#     existing_user = user_service.get_user_by_email(db, user_data.email)
 
-    if existing_user:
-        raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail='Email already registered'
-        )
+#     if existing_user:
+#         raise HTTPException(
+#             status_code = status.HTTP_409_CONFLICT,
+#             detail='Email already registered'
+#         )
     
-    return user_service.create_user(
-        db, user_data
-    )
+#     return user_service.create_user(
+#         db, user_data
+#     )
 
 @router.get('', response_model=list[UserResponse])
-def get_users(db: Session = Depends(get_db)):
+def get_users(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     return user_service.get_all_users(db)
 
 @router.get('/me', response_model=UserResponse)
@@ -41,7 +41,7 @@ def get_current_user_profile(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.get('/{user_id}', response_model=UserResponse)
-def get_user_by_id(user_id: int, db:Session= Depends(get_db)):
+def get_user_by_id(user_id: int, db:Session= Depends(get_db), current_user: User = Depends(require_admin)):
     user = user_service.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
@@ -52,12 +52,18 @@ def get_user_by_id(user_id: int, db:Session= Depends(get_db)):
     return user
 
 @router.put('/{user_id}', response_model=UserResponse)
-def update_user(user_id: int, user_data: UserUpdate ,db:Session= Depends(get_db)):
+def update_user(user_id: int, user_data: UserUpdate ,db:Session= Depends(get_db), current_user: User = Depends(get_current_user)):
     user = user_service.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
             status_code= status.HTTP_404_NOT_FOUND,
             detail='User not found'
+        )
+
+    if (current_user.role != 'ADMIN' and current_user.id != user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You cannot update this user'
         )
     
     return user_service.update_user(
@@ -65,7 +71,7 @@ def update_user(user_id: int, user_data: UserUpdate ,db:Session= Depends(get_db)
     )
 
 @router.delete('/{user_id}')
-def delete_user(user_id: int, db:Session= Depends(get_db)):
+def delete_user(user_id: int, db:Session= Depends(get_db), current_user: User = Depends(require_admin)):
     user = user_service.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(

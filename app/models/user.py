@@ -25,3 +25,8 @@ class User(Base):
         String(100)
     )
 
+    role: Mapped[str] = mapped_column(
+        String(20),
+        default='USER'
+    )
+
