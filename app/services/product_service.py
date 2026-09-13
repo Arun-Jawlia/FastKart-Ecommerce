@@ -1,19 +1,21 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.models.product import Product
 from app.schemas.product import (
     ProductCreate,
     ProductUpdate
 )
+from decimal import Decimal
 
 def create_product(
         db: Session, 
-        product_data: ProductCreate) -> Product:
+        product_data: ProductCreate
+    ) -> Product:
     product = Product(
         name = product_data.name,
         description = product_data.description,
-        price = product_data.name,
-        stock= product_data.price,
+        price = product_data.price,
+        stock= product_data.stock,
         category_id = product_data.category_id
     )
 
@@ -24,13 +26,97 @@ def create_product(
     return product
 
 def get_products(
-    db: Session
-)-> list[Product]:
+    db: Session,
+    page: int,
+    limit: int,
+    search: str | None = None,
+    category_id: int | None = None,
+    min_price : int | None = None,
+    max_price : int | None = None,
+    sort_by: str = 'id',
+    sort_order: str = 'asc'
+):
     statement = select(Product)
+    if search:
+        search_term = f"%{search}%"
 
-    return list(
+        statement = statement.where(
+            Product.name.ilike(search_term)
+        )
+
+    if category_id is not None:
+        statement = statement.where(
+            Product.category_id == category_id
+        )
+
+    if min_price is not None:
+        statement = statement.where(
+            Product.price >= min_price
+        )
+
+    if max_price is not None:
+        statement = statement.where(
+            Product.price <= max_price
+        )    
+    
+    # Count filtered results
+    count_statement = select(
+        func.count()
+    ).select_from(
+        statement.subquery()
+    )
+
+    total = db.scalar(
+        count_statement
+    ) or 0    
+    
+    allowed_sort_fields = {
+    "id": Product.id,
+    "name": Product.name,
+    "price": Product.price,
+    "stock": Product.stock,
+    }
+    sort_column = allowed_sort_fields.get(sort_by)
+
+    if sort_column is None:
+        raise ValueError(
+            "Invalid sort field"
+        )
+    if sort_order == "desc":
+        statement = statement.order_by(
+            sort_column.desc()
+        )
+    else:
+        statement = statement.order_by(
+            sort_column.asc()
+        )
+    
+    offset = (page - 1) * limit
+    
+    products = list(
         db.scalars(statement).all()
     )
+    statement = statement.offset(
+        offset
+    ).limit(
+        limit
+    )
+
+    products = list(
+        db.scalars(statement).all()
+    )
+
+    total_pages = (
+        total + limit - 1
+    ) // limit
+
+    return {
+        "items": products,
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": total_pages,
+    }
 
 def get_product_by_id(
         db: Session,

@@ -16,7 +16,7 @@ class Category(Base):
         index = True
     )
 
-    desciption: Mapped[str | None] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         Text,
         nullable = True
     )

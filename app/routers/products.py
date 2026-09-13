@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_admin
@@ -8,9 +8,12 @@ from app.schemas.product import (
     ProductCreate,
     ProductResponse,
     ProductUpdate,
+    ProductListResponse
 )
 from app.services import category_service
 from app.services import product_service
+
+
 
 
 router = APIRouter(
@@ -39,9 +42,50 @@ def create_product(
     return product_service.create_product(db, product_data)
 
 
-@router.get('', response_model=list[ProductResponse])
-def get_products(db: Session = Depends(get_db)):
-    return product_service.get_products(db)
+@router.get('', response_model=ProductListResponse)
+def get_products(
+        page :int = Query(
+        default = 1,
+        ge = 1
+    ),
+    limit: int = Query(
+        default = 20,
+        ge = 1,
+        le = 100
+    ),
+    search: str | None = None,
+    category_id : int | None = Query(
+        default= None,
+        gt = 0
+    ),
+    min_price: int | None = Query(
+        default = None,
+        gt = 0
+    ),
+    max_price: int | None = Query(
+        default = None,
+        gt = 0
+    ),
+    sort_by: str = Query(
+        default= "id",
+        pattern = "^(id|name|price|stock)$"
+    ),
+    sort_order: str = Query(
+        default = 'asc',
+        pattern = "^(asc|desc)$"
+    ),
+    db: Session = Depends(get_db)):
+    return product_service.get_products(
+        db=db, 
+        page = page, 
+        limit=limit, 
+        search = search, 
+        category_id = category_id, 
+        min_price = min_price, 
+        max_price = max_price,
+        sort_by = sort_by,
+        sort_order = sort_order
+        )
 
 
 @router.get('/{product_id}', response_model=ProductResponse)

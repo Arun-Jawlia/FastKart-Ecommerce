@@ -44,3 +44,10 @@ class ProductResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+class ProductListResponse(BaseModel):
+    items: list[ProductResponse]
+    page: int
+    limit: int
+    total: int
+    total_pages: int
