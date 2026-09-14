@@ -115,6 +115,18 @@ def get_user_orders(
 
     return list(db.scalars(statement).all())
 
+def get_user_order(
+    db: Session,
+    user_id: int,
+    order_id: int,
+):
+    statement = select(Order).where(
+        Order.id == order_id,
+        Order.user_id == user_id,
+    )
+
+    return db.scalar(statement)
+
 def get_all_orders(
     db: Session,
 ):
