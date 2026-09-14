@@ -46,7 +46,7 @@ def get_cart(
             {
                 "id": item.id,
                 "product_id": item.product_id,
-                "product_name": item.product_name,
+                "product_name": item.product.name,
                 "price":item.product.price,
                 "quantity": item.quantity,
                 "subtotal": subtotal

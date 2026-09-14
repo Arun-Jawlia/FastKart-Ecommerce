@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, UniqueConstraint,
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
 
@@ -37,5 +37,5 @@ class CartItem(Base):
             "cart_id",
             "product_id",
             name = 'uq_cart_product'
-        )
+        ),
     )

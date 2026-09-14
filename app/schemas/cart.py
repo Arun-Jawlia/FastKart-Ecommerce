@@ -1,5 +1,5 @@
 from decimal import Decimal
-from pydantic import BaseModel, configDict, Field
+from pydantic import BaseModel, Field
 
 class CartItemAdd(BaseModel):
     product_id: int = Field(gt=0)
