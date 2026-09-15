@@ -26,9 +26,13 @@ class InventoryTransaction(Base):
     new_quantity: Mapped[int] = mapped_column(
         Integer
     )
-    transcation_type: Mapped[str] = mapped_column(
+    transaction_type: Mapped[str] = mapped_column(
         Text,
         nullable = True
+    )
+    reason: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, 

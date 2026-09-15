@@ -8,10 +8,11 @@ from app.database.database import get_db
 from app.models.user import User
 from app.schemas.order import (
     OrderResponse,
-    OrderStatusUpdate
+    OrderStatusUpdate,
+    CheckoutRequest
 )
 from app.models.order import Order
-from app.services import order_service
+from app.services import order_service, address_service
 
 router = APIRouter(
     prefix='/orders',
@@ -20,10 +21,23 @@ router = APIRouter(
 
 @router.post('/checkout', response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def checkout(
+    data: CheckoutRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ): 
-    order, error = order_service.create_order_from_cart(db=db, user_id=current_user.id)
+
+    address = address_service.get_address(
+        db=db,
+        user_id=current_user.id,
+        address_id=data.address_id,
+        )
+
+    if address is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found",
+        )
+    order, error = order_service.create_order_from_cart(db=db, user_id=current_user.id, address=address)
 
     if error == 'CART_NOT_FOUND':
         raise HTTPException(

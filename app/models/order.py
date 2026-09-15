@@ -41,9 +41,38 @@ class Order(Base):
         onupdate=datetime.utcnow,
     )
 
+    shipping_full_name: Mapped[str] = mapped_column(
+    String(100)
+    )
+
+    shipping_phone: Mapped[str] = mapped_column(
+    String(20)
+    )
+
+    shipping_address_line: Mapped[str] = mapped_column(
+    String(255)
+    )
+
+    shipping_city: Mapped[str] = mapped_column(
+    String(100)
+    )
+
+    shipping_state: Mapped[str] = mapped_column(
+    String(100)
+    )
+
+    shipping_postal_code: Mapped[str] = mapped_column(
+    String(20)
+    )
+
+    shipping_country: Mapped[str] = mapped_column(
+    String(100)
+    )
+
     user = relationship("User")
     items = relationship(
         "OrderItem",
         back_populates = 'order',
         cascade="all, delete-orphan"
     )
+

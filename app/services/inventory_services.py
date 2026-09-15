@@ -15,14 +15,14 @@ def restock_product (
     if product is None: 
         return None, "PRODUCT_NOT_FOUND"
 
-    previous_quanity = product.stock
+    previous_quantity = product.stock
 
     product.stock += quantity
 
     transaction = InventoryTransaction(
         product_id = product.id,
         quantity_change = quantity,
-        previous_quanity = previous_quanity,
+        previous_quantity = previous_quantity,
         new_quantity = product.stock,
         transaction_type = 'RESTOCK',
         reason = reason
@@ -136,3 +136,29 @@ def get_low_stock_products(
     return list(
         db.scalars(statement).all()
     )
+
+
+def record_sale(
+    db: Session,
+    product: Product,
+    quantity: int,
+):
+    if quantity > product.stock:
+        return False
+
+    previous_quantity = product.stock
+
+    product.stock -= quantity
+
+    transaction = InventoryTransaction(
+        product_id=product.id,
+        quantity_change=-quantity,
+        previous_quantity=previous_quantity,
+        new_quantity=product.stock,
+        transaction_type="SALE",
+        reason="Order checkout",
+    )
+
+    db.add(transaction)
+
+    return True

@@ -17,6 +17,16 @@ class OrderResponse(BaseModel):
     total: Decimal
     created_at: datetime
     items: list[OrderItemResponse]
+    shipping_full_name: str
+    shipping_phone: str
+    shipping_address_line: str
+    shipping_city: str
+    shipping_state: str
+    shipping_postal_code: str
+    shipping_country: str
 
 class OrderStatusUpdate(BaseModel):
     status: str
+
+class CheckoutRequest(BaseModel):
+    address_id: int
