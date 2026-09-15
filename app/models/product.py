@@ -38,3 +38,7 @@ class Product(Base):
         "Category",
         back_populates="products",
     )
+
+    low_stock_threshold: Mapped[int] = mapped_column(
+    default=5,
+    )

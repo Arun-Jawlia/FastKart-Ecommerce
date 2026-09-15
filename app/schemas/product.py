@@ -13,6 +13,10 @@ class ProductCreate(BaseModel):
         ge=0,
     )
     category_id: int   
+    low_stock_threshold: int = Field(
+    default=5,
+    ge=0,
+)
 
 class ProductUpdate(BaseModel):
     name: str | None = None
@@ -32,6 +36,11 @@ class ProductUpdate(BaseModel):
 
     category_id: int | None = None
 
+    low_stock_threshold: int | None = Field(
+    default=None,
+    ge=0,
+    )
+
 
 class ProductResponse(BaseModel):
     id: int
@@ -40,6 +49,7 @@ class ProductResponse(BaseModel):
     price: Decimal
     stock: int
     category_id: int
+    low_stock_threshold: int
 
     model_config = ConfigDict(
         from_attributes=True
