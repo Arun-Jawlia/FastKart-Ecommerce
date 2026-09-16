@@ -68,3 +68,45 @@ def create_payment(
     return payment, None
 
     
+def verify_payment(
+    db: Session,
+    user_id: int,
+    payment_id: int,
+    provider_payment_id: str,
+):
+    payment = db.scalar(
+        select(Payment)
+        .join(Order)
+        .where(
+            Payment.id == payment_id,
+            Order.user_id == user_id,
+        )
+    )
+
+    if payment is None:
+        return None, "PAYMENT_NOT_FOUND"
+
+    if payment.status == "SUCCESS":
+        return payment, None
+    
+    if payment.provider_payment_id:
+        if (
+            payment.provider_payment_id
+            != provider_payment_id
+        ):
+            return None, "INVALID_PAYMENT"
+
+        return payment, None
+
+    payment.provider_payment_id = (
+        provider_payment_id
+    )
+
+    payment.status = "SUCCESS"
+
+    payment.order.status = "CONFIRMED"
+
+    db.commit()
+    db.refresh(payment)
+
+    return payment, None
