@@ -12,7 +12,7 @@ class PaymentResponse(BaseModel):
     currency: str
     status: str
     provider: str
-    provider_payment: str | None
+    provider_payment_id: str | None
     transaction_reference: str
     created_at: datetime
 

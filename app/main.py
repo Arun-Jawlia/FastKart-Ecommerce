@@ -14,6 +14,7 @@ from app.routers.orders import router as orders_router
 from app.routers.addresses import router as addresses_router
 from app.routers.reviews import router as reviews_router
 from app.routers.inventory import router as inventory_router
+from app.routers.payments import router as payments_router
 
 # app = FastAPI(
 #     title='FastKar Ecommerce API',
@@ -40,6 +41,7 @@ app.include_router(orders_router)
 app.include_router(addresses_router)
 app.include_router(reviews_router)
 app.include_router(inventory_router)
+app.include_router(payments_router)
 
 
 @app.get('/')
