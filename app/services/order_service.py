@@ -5,7 +5,7 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
 from decimal import Decimal
-from app.services import inventory_services
+from app.services import inventory_service
 
 def create_order_from_cart(
         db: Session,
@@ -88,7 +88,7 @@ def create_order_from_cart(
     #     cart_item.product.stock -= cart_item.quantity
 
     for cart_item in cart.items:
-        success = inventory_services.record_sale(
+        success = inventory_service.record_sale(
             db = db,
             product = cart_item.product,
             quantity = cart_item.quantity

@@ -4,7 +4,7 @@ from app.core.dependencies import require_admin
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.inventory import InventoryTransactionResponse, StockSet, StockUpdate
-from app.services import inventory_services
+from app.services import inventory_service
 
 
 router = APIRouter(
@@ -19,7 +19,7 @@ def restock_product(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    product, error = inventory_services.restock_product(
+    product, error = inventory_service.restock_product(
         db= db,
         product_id=product_id,
         quantity = data.quantity,
@@ -48,7 +48,7 @@ def remove_stock(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    product, error = inventory_services.remove_stock(
+    product, error = inventory_service.remove_stock(
         db=db,
         product_id=product_id,
         quantity=data.quantity,
@@ -82,7 +82,7 @@ def set_product_stock(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    product, error = inventory_services.set_stock(
+    product, error = inventory_service.set_stock(
         db=db,
         product_id=product_id,
         quantity=data.quantity,
@@ -110,7 +110,7 @@ def get_inventory_history(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    return inventory_services.get_inventory_history(
+    return inventory_service.get_inventory_history(
         db,
         product_id,
     )
@@ -122,7 +122,7 @@ def get_low_stock_products(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    products = inventory_services.get_low_stock_products(
+    products = inventory_service.get_low_stock_products(
         db
     )
 
