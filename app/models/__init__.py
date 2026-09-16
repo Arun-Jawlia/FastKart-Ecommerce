@@ -8,3 +8,4 @@ from app.models.order_item import OrderItem
 from app.models.address import Address
 from app.models.review import Review
 from app.models.inventory_transaction import InventoryTransaction
+from app.models.payment import Payment
