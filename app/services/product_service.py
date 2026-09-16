@@ -6,6 +6,8 @@ from app.schemas.product import (
     ProductUpdate
 )
 from decimal import Decimal
+from app.services import cache_service
+
 
 def create_product(
         db: Session, 
@@ -122,7 +124,39 @@ def get_product_by_id(
         db: Session,
         product_id: int
 ) -> Product | None:
-    return db.get(Product, product_id)
+    
+    cache_key = f"product:{product_id}"
+    
+    cached_product = cache_service.get_cache(cache_key)
+
+    if cached_product:
+        print("cache hit")
+        return cached_product
+
+    product = db.get(Product, product_id)
+
+    if product is None:
+        return None
+    
+    product_data = {
+        "id": product.id,
+        "name": product.name,
+        "description": product.description,
+        "price": str(product.price),
+        "stock": product.stock,
+        "category_id": product.category_id,
+        "low_stock_threshold": (
+            product.low_stock_threshold
+        ),
+    }
+
+    cache_service.set_cache(
+        cache_key,
+        product_data,
+        expire=300,
+    )
+
+    return product_data
 
 
 def update_product(

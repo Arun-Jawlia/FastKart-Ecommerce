@@ -12,7 +12,7 @@ from app.schemas.order import (
     CheckoutRequest
 )
 from app.models.order import Order
-from app.services import order_service, address_service
+from app.services import order_service, address_service, email_service
 
 router = APIRouter(
     prefix='/orders',
@@ -22,6 +22,7 @@ router = APIRouter(
 @router.post('/checkout', response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def checkout(
     data: CheckoutRequest,
+    # background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ): 
@@ -57,6 +58,12 @@ def checkout(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Insufficient stock for product {product_id}",
         )
+    
+    # background_tasks.add_task(
+    #     email_service.send_order_confirmation_email,
+    #     current_user.email,
+    #         order.id,
+    # )
 
     return order    
 

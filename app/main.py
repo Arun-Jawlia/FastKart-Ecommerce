@@ -16,6 +16,8 @@ from app.routers.reviews import router as reviews_router
 from app.routers.inventory import router as inventory_router
 from app.routers.payments import router as payments_router
 
+from app.database.redis import redis_client
+
 # app = FastAPI(
 #     title='FastKar Ecommerce API',
 #     description='E-commerce backend built with FastAPI and Postgresql',
@@ -62,4 +64,12 @@ def database_health_check(db: Session = Depends(get_db)):
 
     return {
         'database':'Connected'
+    }
+
+@app.get('/health/redis')
+def redis_health_check():
+    redis_client.ping()
+
+    return {
+        'redis':'Connected'
     }
