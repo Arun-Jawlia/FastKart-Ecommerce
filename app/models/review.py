@@ -36,10 +36,10 @@ class Review(Base):
     user = relationship('User')
     product = relationship("Product")
 
-    __tablename__ = (
+    __table_args__ = (
         UniqueConstraint(
-            'user_id',
+            "user_id",
             "product_id",
-            name = 'uq_user_product_review'
-        )
+            name="uq_user_product_review",
+        ),
     )

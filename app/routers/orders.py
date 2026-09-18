@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.core.dependencies import (
     get_current_user,
@@ -22,7 +22,7 @@ router = APIRouter(
 @router.post('/checkout', response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def checkout(
     data: CheckoutRequest,
-    # background_tasks: BackgroundTasks,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ): 
@@ -58,12 +58,11 @@ def checkout(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Insufficient stock for product {product_id}",
         )
-    
-    # background_tasks.add_task(
-    #     email_service.send_order_confirmation_email,
-    #     current_user.email,
-    #         order.id,
-    # )
+    background_tasks.add_task(
+        email_service.send_order_confirmation_email,
+        current_user.email,
+            order.id,
+    )
 
     return order    
 

@@ -4,7 +4,8 @@ from app.core.dependencies import require_admin
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.inventory import InventoryTransactionResponse, StockSet, StockUpdate
-from app.services import inventory_service
+from app.services import inventory_service, cache_service
+from app.core.cache_keys import product_cache_key
 
 
 router = APIRouter(
@@ -31,6 +32,10 @@ def restock_product(
             status_code = status.HTTP_404_NOT_FOUND,
             detail = 'Product not found'
         )
+    
+        # invalidate cache
+    cache_service.delete_cache(product_cache_key(product_id))
+
     
     return {
         "message": "Product Restocked",

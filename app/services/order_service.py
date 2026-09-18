@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from app.models.cart import Cart
 from app.models.order import Order
 from app.models.order_item import OrderItem
@@ -117,6 +117,7 @@ def get_user_orders(
 ):
     statement = (
         select(Order)
+        .options(selectinload(Order.items))
         .where(Order.user_id == user_id)
         .order_by(Order.created_at.desc())
     )
@@ -125,17 +126,17 @@ def get_user_orders(
 
 
 # Get Specific Order
-def get_user_orders(
-    db: Session,
-    user_id: int,
-):
-    statement = (
-        select(Order)
-        .where(Order.user_id == user_id)
-        .order_by(Order.created_at.desc())
-    )
+# def get_user_orders(
+#     db: Session,
+#     user_id: int,
+# ):
+#     statement = (
+#         select(Order)
+#         .where(Order.user_id == user_id)
+#         .order_by(Order.created_at.desc())
+#     )
 
-    return list(db.scalars(statement).all())
+#     return list(db.scalars(statement).all())
 
 def get_user_order(
     db: Session,

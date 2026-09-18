@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.database.init_db import create_tables
@@ -15,7 +16,6 @@ from app.routers.addresses import router as addresses_router
 from app.routers.reviews import router as reviews_router
 from app.routers.inventory import router as inventory_router
 from app.routers.payments import router as payments_router
-
 from app.database.redis import redis_client
 
 # app = FastAPI(
@@ -29,10 +29,19 @@ app = FastAPI(
     version= settings.app_version
 )
 
-@app.on_event('startup')
-def startup():
-    create_tables()
+# @app.on_event('startup')
+# def startup():
+#     create_tables()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(users_router)
 app.include_router(auth_router)
@@ -55,7 +64,7 @@ def root():
 @app.get("/health")
 def health_check():
     return {
-        'status':"Healty"
+        'status':"healthy"
     }
 
 @app.get('/health/db')

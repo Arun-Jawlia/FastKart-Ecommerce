@@ -1,6 +1,6 @@
 from decimal import Decimal
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from app.models.cart import Cart
 from app.models.cart_item import CartItem
 from app.models.product import Product
@@ -11,9 +11,15 @@ def get_or_create_cart(
     user_id: int
 )->Cart:
 
-    statement = select(Cart).where(
-        Cart.user_id == user_id
+    statement = (
+    select(Cart)
+    .options(
+        selectinload(Cart.items)
+        .selectinload(CartItem.product)
     )
+    .where(
+        Cart.user_id == user_id
+    ))
 
     cart = db.scalar(statement)
 

@@ -6,21 +6,31 @@ def set_cache(
     value,
     expire: int = 300
 )->None:
-    redis_client.set(
-        key,
-        json.dumps(value),
-        ex=expire
-    )
+    try:
+        redis_client.set(
+            key,
+            json.dumps(value),
+            ex=expire
+        )
+    except:
+        pass
 
 
 def get_cache(key: str):
-    value = redis_client.get(key)
+    try: 
+        value = redis_client.get(key)
 
-    if value is None:
-        return None
+        if value is None:
+            return None
 
-    return json.loads(value)
+        return json.loads(value)
+    except:
+        pass
+
 
 
 def delete_cache(key: str)->None:
-    redis_client.delete(key)
+    try:
+        redis_client.delete(key)
+    except:
+        pass
