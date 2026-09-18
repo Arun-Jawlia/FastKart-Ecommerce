@@ -8,6 +8,8 @@ from app.schemas.product import (
 from decimal import Decimal
 from app.services import cache_service
 
+def invalidate_product_cache(key: str):
+    cache_service.detete_cache(key)
 
 def create_product(
         db: Session, 
@@ -95,9 +97,6 @@ def get_products(
     
     offset = (page - 1) * limit
     
-    products = list(
-        db.scalars(statement).all()
-    )
     statement = statement.offset(
         offset
     ).limit(
@@ -124,39 +123,10 @@ def get_product_by_id(
         db: Session,
         product_id: int
 ) -> Product | None:
-    
-    cache_key = f"product:{product_id}"
-    
-    cached_product = cache_service.get_cache(cache_key)
-
-    if cached_product:
-        print("cache hit")
-        return cached_product
 
     product = db.get(Product, product_id)
 
-    if product is None:
-        return None
-    
-    product_data = {
-        "id": product.id,
-        "name": product.name,
-        "description": product.description,
-        "price": str(product.price),
-        "stock": product.stock,
-        "category_id": product.category_id,
-        "low_stock_threshold": (
-            product.low_stock_threshold
-        ),
-    }
-
-    cache_service.set_cache(
-        cache_key,
-        product_data,
-        expire=300,
-    )
-
-    return product_data
+    return product
 
 
 def update_product(
@@ -170,7 +140,7 @@ def update_product(
     )
 
     for field, value in update_data.items():
-        setattr(update_data, field, value)
+        setattr(product, field, value)
 
     db.commit()
     db.refresh(product)
@@ -185,5 +155,4 @@ def delete_product(
 
     db.delete(product)
     db.commit()
-
 

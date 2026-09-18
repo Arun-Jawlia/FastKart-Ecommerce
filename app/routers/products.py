@@ -11,10 +11,8 @@ from app.schemas.product import (
     ProductListResponse
 )
 from app.services import category_service
-from app.services import product_service
-
-
-
+from app.services import product_service, cache_service
+from app.core.cache_keys import product_cache_key
 
 router = APIRouter(
     prefix="/products",
@@ -93,6 +91,14 @@ def get_product_by_id(
     product_id: int,
     db: Session = Depends(get_db),
 ):
+    cache_key = product_cache_key(product_id)
+    
+    cached_product = cache_service.get_cache(cache_key)
+
+    if cached_product:
+        print("cache hit")
+        return cached_product
+    
     product = product_service.get_product_by_id(db, product_id)
 
     if not product:
@@ -100,7 +106,23 @@ def get_product_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Product not found'
         )
-    return product
+    product_data = {
+        "id": product.id,
+        "name": product.name,
+        "description": product.description,
+        "price": str(product.price),
+        "stock": product.stock,
+        "category_id": product.category_id,
+        "low_stock_threshold": product.low_stock_threshold,
+    }
+
+    cache_service.set_cache(
+        cache_key,
+        product_data,
+        expire=300,
+    )
+
+    return product_data
 
 @router.put("/{product_id}", response_model=ProductResponse)
 def update_product(
@@ -110,7 +132,7 @@ def update_product(
     current_user: User = Depends(require_admin)
 ):
     product = product_service.get_product_by_id(db, product_id)
-
+    print("Product avaialbel", type(product))
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -125,12 +147,17 @@ def update_product(
                 status_code = status.HTTP_404_NOT_FOUND,
                 detail = 'Category not found'
             )
-        
-    return product_service.update_product(
+    
+    updated_product = product_service.update_product(
         db,
         product,
         product_data
     )
+
+    # invalidate cache
+    cache_service.delete_cache(product_cache_key(product_id))
+        
+    return updated_product
 
 
 @router.delete(

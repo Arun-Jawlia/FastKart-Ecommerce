@@ -5,7 +5,7 @@ def set_cache(
     key: str,
     value,
     expire: int = 300
-):
+)->None:
     redis_client.set(
         key,
         json.dumps(value),
@@ -22,5 +22,5 @@ def get_cache(key: str):
     return json.loads(value)
 
 
-def delete_cache(key: str):
+def delete_cache(key: str)->None:
     redis_client.delete(key)
